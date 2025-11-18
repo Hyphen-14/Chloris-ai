@@ -31,11 +31,11 @@ Project ini dibagi menjadi 5 Fase utama agar pengerjaan terstruktur:
 ### ✅ Phase 1: Setup & Preparation (Minggu 1)
 * [x] Pembentukan Tim & Ideasi.
 * [x] Setup GitHub Repository & Struktur Folder.
-* [ ] Setup Environment Python (Virtual Environment).
-* [ ] Instalasi Library Utama (`ultralytics`, `opencv`, `pandas`).
+* [x] Setup Environment Python (Virtual Environment).
+* [x] Instalasi Library Utama (`ultralytics`, `opencv`, `pandas`).
 
 ### 🔄 Phase 2: Data Engineering (Minggu 2)
-* [ ] **Dataset Hunting:** Mengumpulkan dataset penyakit tanaman (Target: *PlantDoc* atau Dataset Tomat/Cabai).
+* [x] **Dataset Hunting:** Mengumpulkan dataset penyakit tanaman (Target: *PlantDoc* atau Dataset Tomat/Cabai).
 * [ ] **Data Cleaning:** Membuang gambar buram atau tidak relevan.
 * [ ] **Preprocessing:** Resize gambar dan memastikan format anotasi (labeling) sesuai standar YOLO (.txt).
 

@@ -1,0 +1,13 @@
+names:
+- Citrus Greening
+- Healthy Citrus
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: plantdoc-dxufs
+  url: https://universe.roboflow.com/nick-speer-ofaik/plantdoc-dxufs/dataset/7
+  version: 7
+  workspace: nick-speer-ofaik
+test: ../test/images
+train: ../train/images
+val: ../valid/images
