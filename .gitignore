@@ -1,0 +1,48 @@
+# ==========================
+# PYTHON & SYSTEM JUNK
+# ==========================
+# Sampah kompilasi Python (Wajib ignore)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# File sistem Windows & Mac (Sering nyelip bikin kotor)
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Settingan VS Code per-user (Beda orang beda setting)
+.vscode/
+.idea/
+
+# ==========================
+# VIRTUAL ENVIRONMENT
+# ==========================
+# Folder library Python (Ukurannya ratusan MB, JANGAN di-upload)
+venv/
+env/
+.venv/
+
+# File rahasia (API Keys) - Bahaya kalau bocor!
+.env
+
+# ==========================
+# PROJECT AI (CHLORIS)
+# ==========================
+# 1. Dataset Gambar (Giga-bytes)
+# Tim lain bisa download sendiri pakai script 'download_data.py'
+datasets/
+
+# 2. Hasil Training YOLO (Log & Backup Model)
+# Folder ini isinya grafik & file temporary yang besar
+runs/
+
+# 3. File Model AI
+# Biasanya >100MB. Kalau file 'best.pt' sudah final dan kecil,
+# nanti bisa kita upload manual. Tapi default-nya kita ignore dulu.
+*.pt
+*.pth
+*.onnx
+
+# 4. Log Error
+*.log
