@@ -1,0 +1,57 @@
+{
+  "Leaf Rust": {
+    "nama_id": "Karat Daun",
+    "latin": "Puccinia triticina",
+    "gejala": "Bercak oranye atau merah kecoklatan seperti karat besi pada permukaan daun.",
+    "solusi": [
+      "Pangkas daun yang terinfeksi segera.",
+      "Semprotkan fungisida nabati (minyak mimba).",
+      "Hindari menyiram air langsung ke daun di malam hari."
+    ],
+    "tingkat_bahaya": "High"
+  },
+  "Powdery Mildew": {
+    "nama_id": "Embun Tepung",
+    "latin": "Erysiphe cichoracearum",
+    "gejala": "Lapisan putih seperti tepung atau bedak pada permukaan atas daun, menyebabkan daun mengerut.",
+    "solusi": [
+      "Campuran susu dan air (rasio 1:10) semprotkan ke daun.",
+      "Pastikan sirkulasi udara antar tanaman baik.",
+      "Paparkan tanaman ke sinar matahari pagi."
+    ],
+    "tingkat_bahaya": "Medium"
+  },
+  "Tomato Mosaic Virus": {
+    "nama_id": "Virus Mosaik Tomat",
+    "latin": "Tomato mosaic virus (ToMV)",
+    "gejala": "Daun belang-belang hijau muda dan tua (mosaik), keriting, dan pertumbuhan kerdil.",
+    "solusi": [
+      "Cabut dan bakar tanaman yang sakit (Sangat menular!).",
+      "Cuci tangan dan alat dengan sabun setelah memegang tanaman.",
+      "Kendalikan kutu daun sebagai pembawa virus."
+    ],
+    "tingkat_bahaya": "Critical"
+  },
+  "Healthy": {
+    "nama_id": "Tanaman Sehat",
+    "latin": "Plantae sanus",
+    "gejala": "Daun hijau segar, tidak ada bercak, pertumbuhan normal dan kokoh.",
+    "solusi": [
+      "Lanjutkan penyiraman dan pemupukan rutin.",
+      "Lakukan pemangkasan tunas air.",
+      "Jaga kebersihan area tanam."
+    ],
+    "tingkat_bahaya": "Aman"
+  },
+  "Early Blight": {
+    "nama_id": "Hawar Daun Awal",
+    "latin": "Alternaria solani",
+    "gejala": "Bercak coklat tua dengan cincin konsentris (seperti papan target) pada daun tua.",
+    "solusi": [
+      "Lakukan rotasi tanaman.",
+      "Gunakan mulsa organik untuk mencegah spora tanah naik ke daun.",
+      "Aplikasi fungisida tembaga jika perlu."
+    ],
+    "tingkat_bahaya": "Medium"
+  }
+}
