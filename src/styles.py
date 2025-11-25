@@ -40,7 +40,7 @@ def load_css():
                 border-color: rgba(168, 232, 144, 0.6);
             }
 
-            /* TOP INFO BAR (Kotak Kecil di Atas) */
+            /* INFO BOX */
             .info-box {
                 background: rgba(255, 255, 255, 0.05);
                 border-radius: 12px;

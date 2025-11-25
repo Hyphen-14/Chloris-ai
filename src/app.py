@@ -14,7 +14,7 @@ from utils import draw_glowing_box
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="Chloris: Night Bloom",
-    page_icon="🌸",
+    page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -26,12 +26,14 @@ load_css()
 with st.sidebar:
     logo_path = "src\\chloris_logo-removebg.png"
     if os.path.exists(logo_path):
-        st.image(logo_path, width = 'stretch') 
+        # width='stretch' agar tidak ada warning deprecated
+        st.image(logo_path, width='stretch') 
     else:
         st.title("CHLORIS")
 
     st.markdown("<div style='text-align: center; margin-top: -10px; margin-bottom: 20px; color: #888; font-size: 12px; letter-spacing: 2px;'>LUMINOUS AI SYSTEM</div>", unsafe_allow_html=True)
     
+    # Menu kembali ke nuansa Hijau (Default style styles.py akan menangani ini, tapi kita sesuaikan iconnya)
     selected = option_menu(
         menu_title=None,
         options=["Scanner Tanaman", "Ensiklopedia", "Laporan", "Pengaturan"],
@@ -133,6 +135,7 @@ def show_scanner_page():
             start_point = (150, 100)
             end_point = (500, 400)
             
+            # Warna Mint Green
             draw_glowing_box(frame, start_point, end_point, color=(144, 232, 168), thickness=2)
             
             text = "Leaf Rust :: 92%"
@@ -144,22 +147,21 @@ def show_scanner_page():
             cv2.line(frame, (start_point[0], scan_y), (end_point[0], scan_y), (178, 183, 255), 2)
             
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image_placeholder.image(frame, channels="RGB", width = 'stretch')
+            # FIX: Gunakan width='stretch'
+            image_placeholder.image(frame, channels="RGB", width='stretch')
         
         cap.release()
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-# --- 5. HALAMAN ENSIKLOPEDIA (DIPERBAIKI) ---
+# --- 5. HALAMAN ENSIKLOPEDIA (PERBAIKAN UTAMA) ---
 def show_encyclopedia_page():
     st.markdown("## 📚 Grimoire Penyakit Tanaman")
     st.markdown("Database lengkap pengetahuan tentang patogen dan penyembuhannya.")
     
-    # Search Bar
     search = st.text_input("🔍 Cari penyakit...", placeholder="Contoh: Karat Daun")
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # LOAD DATABASE JSON
     try:
         with open('data/penyakit.json', 'r') as f:
             database = json.load(f)
@@ -167,14 +169,12 @@ def show_encyclopedia_page():
         st.error("Database 'data/penyakit.json' tidak ditemukan! Pastikan file sudah dibuat.")
         database = {}
 
-    # Tampilkan Kartu
     found = False
     for eng_name, info in database.items():
-        # Logic Pencarian (Case Insensitive)
         if search.lower() in eng_name.lower() or search.lower() in info['nama_id'].lower():
             found = True
             
-            # --- LOGIKA PEWARNAAN LABEL ---
+            # Logic Pewarnaan Status (Kembali ke Tema Asli)
             level = info.get('tingkat_bahaya', 'Medium') 
             
             if level == "Critical":
@@ -198,11 +198,11 @@ def show_encyclopedia_page():
                 badge_bg = "rgba(168, 232, 144, 0.15)"
                 border_color = "#A8E890"
 
-            # --- PERBAIKAN UTAMA DI SINI ---
-            # Kita gunakan f-string python untuk memasukkan variabel ke dalam HTML
-            # Lalu kita render menggunakan unsafe_allow_html=True
+            # --- PENAMBALAN KEBOCORAN ---
+            # Kita buat string HTML dalam satu baris atau f-string bersih
+            # untuk menghindari error parsing markdown.
             
-            html_content = f"""
+            card_html = f"""
             <div class="glass-card" style="border-left: 4px solid {badge_color};">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
                     <div>
@@ -223,11 +223,9 @@ def show_encyclopedia_page():
                         </span>
                     </div>
                 </div>
-                
                 <div style="margin-bottom: 10px;">
                     <p style="font-style: italic; color: #d1e7dd; font-size: 14px; margin: 0;">🔬 Latin: {info['latin']}</p>
                 </div>
-                
                 <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-top: 5px;">
                     <p style="margin:0; font-size: 14px; color: #e0f2f1;">
                         <span style="color: {badge_color}; font-weight: bold;">🥀 Gejala:</span> {info['gejala']}
@@ -236,9 +234,10 @@ def show_encyclopedia_page():
             </div>
             """
             
-            st.markdown(html_content, unsafe_allow_html=True)
+            # EKSEKUSI RENDER DENGAN AMAN
+            st.markdown(card_html, unsafe_allow_html=True)
             
-            # Expander Solusi (Bawaan Streamlit, jadi aman dari HTML error)
+            # Bagian Expander tetap pakai Streamlit native agar aman
             with st.expander(f"💊 Lihat Resep Penyembuhan"):
                 for i, step in enumerate(info['solusi'], 1):
                     st.markdown(f"""

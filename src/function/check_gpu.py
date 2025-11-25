@@ -1,4 +1,6 @@
 import torch
+from ultralytics import YOLO
+
 
 #Pengecekan sederhana
 if torch.cuda.is_available():
@@ -13,3 +15,11 @@ else:
     print("Python masih jalan di mode CPU.")
     print("Coba restart VS Code atau restart komputer.")
     print("="*40)
+
+
+print("Torch:", torch.__version__)
+print("GPU:", torch.cuda.get_device_name(0))
+
+model = YOLO('yolov8s.pt')
+model.to(0)
+print("Model moved to GPU successfully!")
