@@ -1,0 +1,37 @@
+name: plant_scan_app
+description: A simple plant disease scanner starter
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Camera
+  camera: ^0.10.5
+
+  # Image processing (Penting: Versi 4.x ini modern, tapi tidak cocok sama tflite_helper lama)
+  image: ^4.1.7
+
+  # Permissions & Storage
+  permission_handler: ^11.3.0
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+  # HTTP requests
+  http: ^1.1.2
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/labels.txt
+    - assets/models/plant_detector.tflite
