@@ -24,6 +24,7 @@ dependencies:
   # HTTP requests
   http: ^1.1.2
 
+roboflow_inference_flutter: ^0.0.6
 
 dev_dependencies:
   flutter_test:
@@ -33,5 +34,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/labels.txt
-    - assets/models/plant_detector.tflite
+    - lib/data/penyakit.json

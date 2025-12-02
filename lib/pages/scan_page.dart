@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import '../services/ai_service.dart';
+import '../models/detection.dart';
 import 'result_page.dart';
 
 class ScanPage extends StatefulWidget {
@@ -58,45 +59,75 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _onCapturePressed() async {
-    if (_isAnalyzing) return;
-
-    setState(() => _isAnalyzing = true);
-
-    final XFile? file = await _cameraService.takePicture();
-
-    if (file != null) {
-      try {
-        // Panggil AI Service (Dummy/Real)
-        final detections = await AiService.instance.analyzeImage(file.path);
-        
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ResultPage(
-                imageFilePath: file.path, 
-                detections: detections
-              ),
+ Future<void> _onCapturePressed() async {
+  if (_isAnalyzing) return;
+  
+  setState(() => _isAnalyzing = true);
+  
+  final XFile? file = await _cameraService.takePicture();
+  
+  if (file != null) {
+    print('📸 Picture taken: ${file.path}');
+    
+    try {
+      final aiService = AiService.instance;
+      print('🔄 Starting AI analysis...');
+      
+      final startTime = DateTime.now();
+      final analysisResults = await aiService.analyzeImage(file.path);
+      final endTime = DateTime.now();
+      
+      final duration = endTime.difference(startTime);
+      print('⏱️ Analysis took: ${duration.inSeconds} seconds');
+      
+      final detections = analysisResults.map((map) => Detection.fromMap(map)).toList();
+      
+      print('🎯 Results: ${detections.length} detections');
+      for (var detection in detections) {
+        print('   - ${detection.label} (${detection.confidence})');
+      }
+      
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(
+              imageFilePath: file.path, 
+              detections: detections,
             ),
-          );
-        }
-      } catch (e) {
-        print("Error analyzing: $e");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Gagal menganalisa: $e")),
-          );
-        }
+          ),
+        );
+      }
+      
+    } catch (e) {
+      print('❌ Analysis error: $e');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Analisis gagal: ${e.toString()}'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        
+        // Tetap navigasi dengan empty results
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(
+              imageFilePath: file.path, 
+              detections: [],
+            ),
+          ),
+        );
       }
     }
-
-    if (mounted) {
-      setState(() => _isAnalyzing = false);
-    }
   }
-
-  @override
+  
+  if (mounted) {
+    setState(() => _isAnalyzing = false);
+  }
+}  @override
   Widget build(BuildContext context) {
     if (!_isInitialized || !_cameraService.isInitialized) {
       return const Scaffold(
@@ -141,20 +172,69 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
           ),
 
           // 3. OVERLAY LOADING (JIKA SEDANG PROSES)
+          // Di scan_page.dart, update bagian loading:
+
           if (_isAnalyzing)
-            Container(
+            Positioned.fill(
+            child: Container(
               color: Colors.black87,
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: Colors.green),
-                    SizedBox(height: 16),
-                    Text("Menganalisa Tanaman...", style: TextStyle(color: Colors.white))
-                  ],
+              child: Center(
+                child: Card(
+                  color: Colors.green[900]!.withOpacity(0.8),
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Spinning loader
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 5,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        
+                        SizedBox(height: 20),
+                        
+                        // Text
+                        Text(
+                          "SEDANG ANALISIS",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        
+                        SizedBox(height: 10),
+                        
+                        Text(
+                          "Gambar sedang diproses oleh AI",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        
+                        SizedBox(height: 5),
+                        
+                        Text(
+                          "Tunggu 5-10 detik",
+                          style: TextStyle(
+                            color: Colors.white60,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
+          ),
 
           // 4. TOMBOL SHUTTER (JEPRET) - TENGAH BAWAH
           if (!_isAnalyzing)
