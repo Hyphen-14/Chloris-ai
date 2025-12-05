@@ -1,30 +1,39 @@
-import cv2
-import numpy as np
+# app/utils.py
+import streamlit as st
+import os
+from app.config import SESSION_DEFAULTS
 
-def draw_glowing_box(img, pt1, pt2, color=(144, 232, 168), thickness=2):
-    """
-    Menggambar bounding box dengan efek techy/glowing.
-    Color: Mint Green (BGR Format untuk OpenCV)
-    """
-    x1, y1 = pt1
-    x2, y2 = pt2
-    r = 20 
+def initialize_session():
+    """Initialize session state"""
+    for key, value in SESSION_DEFAULTS.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
     
-    # Gambar garis sudut
-    cv2.line(img, (x1, y1), (x1 + r, y1), color, thickness)
-    cv2.line(img, (x1, y1), (x1, y1 + r), color, thickness)
-    cv2.line(img, (x2, y1), (x2 - r, y1), color, thickness)
-    cv2.line(img, (x2, y1), (x2, y1 + r), color, thickness)
-    cv2.line(img, (x1, y2), (x1 + r, y2), color, thickness)
-    cv2.line(img, (x1, y2), (x1, y2 - r), color, thickness)
-    cv2.line(img, (x2, y2), (x2 - r, y2), color, thickness)
-    cv2.line(img, (x2, y2), (x2, y2 - r), color, thickness)
+    # Initialize API key from environment
+    if 'roboflow_api_key' not in st.session_state:
+        st.session_state.roboflow_api_key = os.getenv("ROBOFLOW_API_KEY", "")
+
+def clear_session():
+    """Clear session state"""
+    keys = list(st.session_state.keys())
+    for key in keys:
+        del st.session_state[key]
     
-    # Titik sudut bercahaya (Putih)
-    glow_color = (255, 255, 255)
-    cv2.circle(img, (x1, y1), 3, glow_color, -1)
-    cv2.circle(img, (x2, y1), 3, glow_color, -1)
-    cv2.circle(img, (x1, y2), 3, glow_color, -1)
-    cv2.circle(img, (x2, y2), 3, glow_color, -1)
+    # Re-initialize
+    initialize_session()
+
+def validate_image_file(file):
+    """Validate uploaded image file"""
+    if file is None:
+        return False, "No file uploaded"
     
-    return img
+    allowed_types = ['image/jpeg', 'image/png', 'image/bmp']
+    max_size = 10 * 1024 * 1024  # 10MB
+    
+    if file.type not in allowed_types:
+        return False, "File type not supported"
+    
+    if file.size > max_size:
+        return False, "File size exceeds 10MB limit"
+    
+    return True, "File valid"
