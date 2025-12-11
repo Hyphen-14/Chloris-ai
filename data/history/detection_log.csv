@@ -1,0 +1,13 @@
+timestamp,filename,disease_name,confidence,risk_level,image_path
+2025-12-06 01:03:36,bellPepper-blight.jpeg,Layu & Hawar Daun - Selada,64.8,High,data\history\Layu _ Hawar Daun - Selada\20251206_010336_bellPepper-blight.jpeg
+2025-12-06 01:04:25,images.jpeg,Layu & Hawar Daun - Selada,47.5,High,data\history\Layu _ Hawar Daun - Selada\20251206_010425_images.jpeg
+2025-12-06 01:08:48,Screenshot 2025-11-28 232505.png,Buah Mentimun Sehat,67.1,Low,data\history\Buah Mentimun Sehat\20251206_010848_Screenshot 2025-11-28 232505.png
+2025-12-06 01:13:38,Screenshot 2025-11-26 203522.png,Daun Bell Pepper Sakit,63.9,Medium,data\history\Daun Bell Pepper Sakit\20251206_011338_Screenshot 2025-11-26 203522.png
+2025-12-06 01:15:59,lettuce_sakit.jpeg,Buah Mentimun Sakit/Cacat,86.9,Medium,data\history\Buah Mentimun Sakit_Cacat\20251206_011559_lettuce_sakit.jpeg
+2025-12-06 01:23:21,strawbery_sehat1.jpeg,Buah Stroberi Sehat,43.8,Low,data\history\Buah Stroberi Sehat\20251206_012321_strawbery_sehat1.jpeg
+2025-12-07 18:33:44,lettuce_sakit.jpeg,Buah Mentimun Sakit/Cacat,86.9,Medium,data\history\Buah Mentimun Sakit_Cacat\20251207_183344_lettuce_sakit.jpeg
+2025-12-07 18:43:00,camera_capture.jpg,Tidak Terdeteksi,0.0,Rendah,data\history\Tidak Terdeteksi\20251207_184300_camera_capture.jpg
+2025-12-08 14:04:03,camera_capture.jpg,Daun Bell Pepper Sakit,86.7,Medium,data\history\Daun Bell Pepper Sakit\20251208_140403_camera_capture.jpg
+2025-12-08 14:11:55,camera_capture.jpg,Tidak Terdeteksi,0.0,Rendah,data\history\Tidak Terdeteksi\20251208_141155_camera_capture.jpg
+2025-12-08 18:47:26,camera_capture.jpg,Mosaic Virus - Selada,80.4,High,data\history\Mosaic Virus - Selada\20251208_184726_camera_capture.jpg
+2025-12-08 18:55:55,camera_capture.jpg,Tidak Terdeteksi,0.0,Rendah,data\history\Tidak Terdeteksi\20251208_185555_camera_capture.jpg

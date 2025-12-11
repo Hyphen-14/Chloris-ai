@@ -1,429 +1,209 @@
 import streamlit as st
 import tempfile
 import os
+import re  # Import RegEx untuk memperbaiki format teks
 from PIL import Image
 from config import COLORS
-from components.image_utils import draw_bounding_boxes, create_detection_summary
-from utils import perform_detection, analyze_detection_results
+from utils import perform_detection, analyze_detection_results, create_detection_summary, save_scan_result
 
 def render_scanner_page():
-    """Render halaman scanner tanaman dengan tema cerah"""
+    """Render halaman scanner tanaman (Fixed: Recommendations & Bold Text)"""
     
-    # Tab untuk pilihan input
-    tab1, tab2 = st.tabs(["📷 Ambil Foto Langsung", "📁 Upload dari Komputer"])
+    # 1. INIT STATE
+    if 'scan_results' not in st.session_state:
+        st.session_state['scan_results'] = None
+
+    # 2. HEADER
+    st.markdown(f"""
+    <div class="page-header-box">
+        <h2 style="color: {COLORS['text_main']}; margin-top: 0;">🔍 Scanner Tanaman</h2>
+        <p style="color: {COLORS['text_body']}; margin-bottom: 0;">
+            Diagnosa penyakit tanaman secara real-time.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.write("")
+    
+    # 3. TAB INPUT
+    tab1, tab2 = st.tabs(["📸 Ambil Foto Langsung", "📁 Upload dari Komputer"])
     
     with tab1:
+        st.write("")
         render_camera_tab()
-    
     with tab2:
+        st.write("")
         render_upload_tab()
 
+    # 4. HASIL SCAN
+    if st.session_state['scan_results']:
+        display_results_from_state()
+
 def render_camera_tab():
-    """Render tab kamera"""
-    
-    st.markdown('<div class="custom-card card-upload">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">📷 Foto Langsung dengan Kamera</div>', unsafe_allow_html=True)
-    
     st.markdown(f"""
-    <div style="color: {COLORS['text_medium']}; margin-bottom: 1.5rem;">
-        Ambil foto tanaman secara langsung menggunakan kamera perangkat Anda.
-        Pastikan pencahayaan cukup dan fokus pada area daun yang ingin diperiksa.
+    <div style="background-color: {COLORS['card_bg']}; padding: 20px; border-radius: 15px; border: 1px solid {COLORS['border']}; margin-bottom: 20px;">
+        <h5 style="color: {COLORS['text_main']}; margin-top: 0;">📷 Kamera Aktif</h5>
     </div>
     """, unsafe_allow_html=True)
     
-    # Kamera input
-    camera_input = st.camera_input(
-        "Klik ikon kamera untuk mengambil foto",
-        help="Jarak optimal: 30-50cm dari tanaman. Fokus pada daun."
-    )
+    camera_input = st.camera_input("Shutter")
     
     if camera_input:
-        with st.spinner("🔍 Menganalisis kesehatan tanaman..."):
-            # Simpan file sementara
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
-                tmp_file.write(camera_input.read())
-                image_path = tmp_file.name
-            
-            # Proses deteksi
-            process_and_display_results(image_path, camera_input, "camera_capture.jpg")
-            
-            # Bersihkan file temp
-            os.unlink(image_path)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        process_image(camera_input, "camera_capture.jpg", is_camera=True)
 
 def render_upload_tab():
-    """Render tab upload gambar"""
-    
-    st.markdown('<div class="custom-card card-upload">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">📁 Upload Gambar Tanaman</div>', unsafe_allow_html=True)
-    
-    # Area upload
-    uploaded_file = st.file_uploader(
-        "**Seret dan lepas file gambar ke sini atau klik untuk memilih**",
-        type=['jpg', 'jpeg', 'png'],
-        help="Format: JPG, JPEG, PNG | Ukuran maks: 10MB",
-        label_visibility="collapsed"
-    )
-    
-    if uploaded_file:
-        # Buka gambar
-        image = Image.open(uploaded_file)
-        
-        # Tampilkan preview dan info
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**🖼️ Gambar Preview:**")
-            st.image(image, use_column_width=True)
-        
-        with col2:
-            st.markdown("**📋 Informasi File:**")
-            st.markdown(f"""
-            <div style="background: {COLORS['light_gray']}; 
-                        padding: 1rem; 
-                        border-radius: 8px;
-                        border-left: 4px solid {COLORS['info']};">
-                <div style="margin-bottom: 0.5rem;">
-                    <strong>Nama File:</strong><br>
-                    <span style="color: {COLORS['text_medium']};">{uploaded_file.name}</span>
-                </div>
-                <div style="margin-bottom: 0.5rem;">
-                    <strong>Ukuran:</strong><br>
-                    <span style="color: {COLORS['text_medium']};">{uploaded_file.size / 1024:.1f} KB</span>
-                </div>
-                <div style="margin-bottom: 0.5rem;">
-                    <strong>Format:</strong><br>
-                    <span style="color: {COLORS['text_medium']};">{uploaded_file.type.split('/')[-1].upper()}</span>
-                </div>
-                <div>
-                    <strong>Confidence Threshold:</strong><br>
-                    <span style="color: {COLORS['primary']}; font-weight: 600;">
-                        {st.session_state.confidence_threshold:.0%}
-                    </span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Tombol analisis
-        if st.button("🚀 Mulai Analisis AI", type="primary", use_container_width=True):
-            with st.spinner("🔄 Menjalankan deteksi penyakit..."):
-                # Simpan file sementara
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
-                    image.save(tmp_file.name, 'JPEG')
-                    image_path = tmp_file.name
-                
-                # Proses deteksi
-                process_and_display_results(image_path, image, uploaded_file.name)
-                
-                # Bersihkan file temp
-                os.unlink(image_path)
-    else:
-        # Placeholder upload area
-        st.markdown(f"""
-        <div class="upload-area">
-            <div style="font-size: 3.5rem; color: {COLORS['primary']}; margin-bottom: 1rem;">📁</div>
-            <div style="font-size: 1.1rem; font-weight: 600; color: {COLORS['text_dark']}; margin-bottom: 0.5rem;">
-                Upload Gambar Tanaman
-            </div>
-            <div style="color: {COLORS['text_medium']}; margin-bottom: 1.5rem;">
-                Seret file gambar ke area ini atau klik untuk memilih dari komputer
-            </div>
-            <div style="color: {COLORS['text_light']}; font-size: 0.9rem; background: {COLORS['white']}; 
-                    padding: 0.75rem; border-radius: 6px; display: inline-block;">
-                📏 Format: JPG, JPEG, PNG<br>
-                💾 Ukuran maks: 10MB per file
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Contoh gambar yang bisa dianalisis
-        st.markdown("### 📸 Contoh Gambar yang Bisa Dianalisis")
-        
-        examples = [
-            ("Daun Cabai Sehat", "cabai_healthy.jpg", "🍅", COLORS['success']),
-            ("Daun Tomat Sakit", "tomato_blight.jpg", "🌶️", COLORS['warning']),
-            ("Daun Kentang", "potato_leaf.jpg", "🥔", COLORS['info']),
-            ("Daun Tanaman Hias", "ornamental.jpg", "🌿", COLORS['secondary'])
-        ]
-        
-        cols = st.columns(4)
-        for col, (title, filename, icon, color) in zip(cols, examples):
-            with col:
-                st.markdown(f"""
-                <div style="background: {color}15; 
-                            border: 1px solid {color}30;
-                            border-radius: 10px; 
-                            padding: 1rem; 
-                            text-align: center;
-                            height: 100%;">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">{icon}</div>
-                    <div style="font-weight: 600; color: {COLORS['text_dark']}; margin-bottom: 0.25rem;">
-                        {title}
-                    </div>
-                    <div style="color: {COLORS['text_medium']}; font-size: 0.85rem;">
-                        {filename}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-def process_and_display_results(image_path, original_image, filename):
-    """Proses gambar dan tampilkan hasil"""
-    
-    # Status model
-    using_real_model = bool(st.session_state.get('roboflow_api_key'))
-    
-    with st.spinner("🔄 Menjalankan deteksi AI..." if using_real_model else "🔄 Menjalankan simulasi..."):
-        # Lakukan deteksi
-        detection_results = perform_detection(
-            image_path, 
-            confidence_threshold=st.session_state.confidence_threshold,
-            filename=filename
-        )
-        
-        # Analisis hasil
-        analysis = analyze_detection_results(detection_results, st.session_state.confidence_threshold)
-        
-        # Buat summary
-        summary = create_detection_summary(detection_results['predictions'], st.session_state.confidence_threshold)
-        
-        # Tampilkan hasil
-        display_detection_results(original_image, detection_results, analysis, summary, filename)
-
-def display_detection_results(original_image, detection_results, analysis, summary, filename):
-    """Tampilkan hasil deteksi"""
-    
-    # Header dengan status model
-    model_badge = "🤖 Roboflow Model" if detection_results.get('is_real_model') else "🔄 Simulation Mode"
-    badge_color = COLORS['success'] if detection_results.get('is_real_model') else COLORS['warning']
-    
     st.markdown(f"""
-    <div style="background: {badge_color}15; 
-                border-left: 4px solid {badge_color};
-                padding: 0.75rem;
-                border-radius: 0 8px 8px 0;
-                margin-bottom: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <div style="font-weight: 600; color: {badge_color};">{model_badge}</div>
-            <div style="color: {COLORS['text_medium']}; font-size: 0.9rem;">
-                {analysis.get('model_used', 'Unknown')}
-            </div>
-        </div>
+    <div style="background-color: {COLORS['card_bg']}; padding: 20px; border-radius: 15px; border: 1px solid {COLORS['border']}; margin-bottom: 20px;">
+        <h5 style="color: {COLORS['text_main']}; margin-top: 0;">📁 Upload File</h5>
     </div>
     """, unsafe_allow_html=True)
     
-    # Gambar dengan bounding box
-    if isinstance(original_image, str):
-        image_pil = Image.open(original_image)
-    else:
-        image_pil = original_image
+    uploaded_file = st.file_uploader("Drop file", type=['jpg', 'jpeg', 'png'], label_visibility="collapsed")
     
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        st.markdown("---")
+        c1, c2 = st.columns([1, 2])
+        with c1:
+            st.markdown(f"<p style='color: {COLORS['text_main']}; font-weight: 600;'>🖼️ Preview:</p>", unsafe_allow_html=True)
+            st.image(image, use_container_width=True)
+        with c2:
+            st.markdown(f"<p style='color: {COLORS['text_main']}; font-weight: 600;'>📋 Info:</p>", unsafe_allow_html=True)
+            st.info(f"File: {uploaded_file.name}")
+            
+            if st.button("🚀 Analisis Sekarang", type="primary", use_container_width=True):
+                process_image(uploaded_file, uploaded_file.name)
+
+def process_image(image_input, filename, is_camera=False):
+    with st.spinner("🔄 Menganalisis..."):
+        try:
+            if is_camera:
+                image_pil = Image.open(image_input)
+            else:
+                image_pil = Image.open(image_input)
+                
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+                if image_pil.mode in ("RGBA", "P"): image_pil = image_pil.convert("RGB")
+                image_pil.save(tmp_file.name)
+                image_path = tmp_file.name
+            
+            detection_results = perform_detection(
+                image_path, 
+                confidence_threshold=st.session_state.confidence_threshold,
+                filename=filename
+            )
+            analysis = analyze_detection_results(detection_results, st.session_state.confidence_threshold)
+            summary = create_detection_summary(detection_results['predictions'], st.session_state.confidence_threshold)
+            
+            st.session_state['scan_results'] = {
+                'image': image_pil,
+                'filename': filename,
+                'detection_results': detection_results,
+                'analysis': analysis,
+                'summary': summary
+            }
+            
+            os.unlink(image_path)
+        except Exception as e:
+            st.error(f"Terjadi kesalahan: {e}")
+
+def display_results_from_state():
+    """Menampilkan hasil dengan Teks Rapi (Anti-Bintang)"""
+    data = st.session_state['scan_results']
+    original_image = data['image']
+    analysis = data['analysis']
+    summary = data['summary']
+    detection_results = data['detection_results']
+    filename = data['filename']
+    
+    from components.image_utils import draw_bounding_boxes
+
+    st.markdown("---")
+    st.markdown(f"<h3 style='color: {COLORS['text_main']}; text-align: center;'>📊 Hasil Analisis AI</h3>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
     image_with_boxes = draw_bounding_boxes(
-        image_pil,
+        original_image,
         detection_results['predictions'],
         st.session_state.confidence_threshold
     )
     
-    # Section 1: Visualisasi
-    st.markdown("### 🖼️ Visualisasi Deteksi")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(f"""
-        <div style="background: {COLORS['white']}; 
-                    border-radius: 10px; 
-                    padding: 1rem;
-                    border: 1px solid {COLORS['gray']};">
-            <div style="color: {COLORS['text_dark']}; font-weight: 600; margin-bottom: 0.75rem;">
-                📸 Gambar Asli
-            </div>
-        """, unsafe_allow_html=True)
-        st.image(original_image, use_column_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div style="background: {COLORS['white']}; 
-                    border-radius: 10px; 
-                    padding: 1rem;
-                    border: 1px solid {COLORS['gray']};">
-            <div style="color: {COLORS['text_dark']}; font-weight: 600; margin-bottom: 0.75rem;">
-                🔍 Hasil Deteksi AI
-            </div>
-        """, unsafe_allow_html=True)
-        st.image(image_with_boxes, use_column_width=True)
-        
-        # Legenda warna
-        st.markdown(f"""
-        <div style="background: {COLORS['light_gray']}; 
-                    border-radius: 8px; 
-                    padding: 0.75rem;
-                    margin-top: 1rem;
-                    font-size: 0.85rem;">
-            <div style="color: {COLORS['text_dark']}; font-weight: 600; margin-bottom: 0.5rem;">
-                🎨 Legenda Warna:
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                <div style="width: 15px; height: 15px; background: #4CAF50; border-radius: 3px;"></div>
-                <span style="color: {COLORS['text_medium']};">Tanaman Sehat</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                <div style="width: 15px; height: 15px; background: #f44336; border-radius: 3px;"></div>
-                <span style="color: {COLORS['text_medium']};">Penyakit (High Confidence)</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div style="width: 15px; height: 15px; background: #FF9800; border-radius: 3px;"></div>
-                <span style="color: {COLORS['text_medium']};">Penyakit (Medium Confidence)</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Section 2: Ringkasan Metrics (Card Kuning)
-    st.markdown("### 📈 Ringkasan Metrics")
-    
-    cols = st.columns(4)
-    metrics = [
-        ("Skor Kesehatan", f"{analysis['health_score']}%", "❤️", 
-         "card-metrics", analysis['health_score'] > 70),
-        ("Risiko Penyakit", analysis['disease_risk'], "⚠️", 
-         "card-metrics", analysis['disease_risk'] == "Rendah"),
-        ("Confidence", f"{analysis['avg_confidence']}%", "📊", 
-         "card-metrics", analysis['avg_confidence'] > 70),
-        ("Objek Terdeteksi", f"{summary['filtered_detections']}", "🔍", 
-         "card-metrics", summary['filtered_detections'] > 0)
-    ]
-    
-    for col, (label, value, icon, card_class, is_good) in zip(cols, metrics):
-        with col:
-            color = COLORS['success'] if is_good else COLORS['text_dark']
-            st.markdown(f"""
-            <div class="custom-card {card_class}">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <div style="font-size: 1.5rem;">{icon}</div>
-                    <div style="font-size: 0.85rem; color: {COLORS['text_medium']};">{label}</div>
-                </div>
-                <div style="font-size: 1.8rem; font-weight: 700; color: {color};">
-                    {value}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    # Section 3: Diagnosis (Card Hijau/Biru)
-    st.markdown("### 🩺 Diagnosis")
-    
-    card_class = "card-diagnosis" if analysis['is_healthy'] else "card-recommendation"
-    border_color = COLORS['success'] if analysis['is_healthy'] else COLORS['warning']
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(f"""
-        <div class="custom-card {card_class}">
-            <div style="color: {border_color}; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                {'✅' if analysis['is_healthy'] else '⚠️'} Hasil Diagnosis
-            </div>
-            <div style="font-size: 1.1rem; font-weight: 600; color: {COLORS['text_dark']}; margin-bottom: 0.5rem;">
-                {analysis['diagnosis']}
-            </div>
-            <div style="color: {COLORS['text_medium']}; line-height: 1.6;">
-                {analysis['detailed_diagnosis']}
-            </div>
-            <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid {COLORS['gray']};">
-                <div style="color: {COLORS['text_light']}; font-size: 0.9rem;">
-                    Confidence Level: <span style="color: {border_color}; font-weight: 600;">{analysis['confidence_level']}</span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        # Deteksi spesifik
-        if summary.get('primary_disease'):
-            st.markdown(f"""
-            <div class="custom-card card-diagnosis">
-                <div style="color: {COLORS['warning']}; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                ⚠️ Penyakit Terdeteksi
-                </div>
-                <div style="font-weight: 600; color: {COLORS['text_dark']}; margin-bottom: 0.5rem;">
-                    {summary['primary_disease']}
-                </div>
-                <div style="color: {COLORS['text_medium']};">
-                    Confidence: <strong>{analysis['avg_confidence']}%</strong><br>
-                    Objek terdeteksi: <strong>{summary['unhealthy_count']}</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="custom-card card-diagnosis">
-                <div style="color: {COLORS['success']}; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                ✅ Status Tanaman
-                </div>
-                <div style="font-weight: 600; color: {COLORS['text_dark']}; margin-bottom: 0.5rem;">
-                    Tanaman Sehat
-                </div>
-                <div style="color: {COLORS['text_medium']};">
-                    Tidak terdeteksi penyakit signifikan<br>
-                    Objek sehat: <strong>{summary.get('healthy_count', 0)}</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    # Section 4: Rekomendasi (Card Biru)
-    st.markdown("### 💡 Rekomendasi Perawatan")
+    with col1: st.image(original_image, caption="Asli", use_container_width=True)
+    with col2: st.image(image_with_boxes, caption="Deteksi", use_container_width=True)
+
+    # Status Bar
+    display_name = analysis['diagnosis']
+    status_bg = COLORS['success'] if analysis['is_healthy'] else COLORS['warning']
+    status_msg = f"✅ {display_name}" if analysis['is_healthy'] else f"⚠️ TERDETEKSI: {display_name}"
     
     st.markdown(f"""
-    <div class="custom-card card-recommendation">
-        <div style="color: {COLORS['info']}; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-        🛠️ Langkah-langkah yang Disarankan
-        </div>
+    <div style="margin: 20px 0; background-color: {status_bg}; color: white; padding: 15px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 1.2rem;">
+        {status_msg}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Metrics
+    m1, m2, m3, m4 = st.columns(4)
+    metrics_data = [
+        ("Kesehatan", f"{analysis['health_score']}%", analysis['health_score'] > 70),
+        ("Risiko", analysis['disease_risk'], analysis['disease_risk'] == "Rendah"),
+        ("Confidence", f"{analysis['avg_confidence']}%", True),
+        ("Objek", str(summary['filtered_detections']), True)
+    ]
+    for col, (label, val, good) in zip([m1, m2, m3, m4], metrics_data):
+        color = COLORS['success'] if good else COLORS['warning']
+        with col:
+            st.markdown(f"""
+            <div style="background: {COLORS['white']}; padding: 10px; border-radius: 10px; border: 1px solid {COLORS['border']}; text-align: center;">
+                <div style="font-size: 0.8rem; color: {COLORS['text_light']}">{label}</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: {color}">{val}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # --- ANALISIS DETAIL (FIX: BOLD TEXT) ---
+    # Menggunakan Regex untuk mengubah **Teks** menjadi <b>Teks</b>
+    clean_diagnosis = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', analysis['detailed_diagnosis'])
+    
+    st.markdown(f"""
+    <div style="background: {COLORS['white']}; padding: 20px; border-radius: 15px; border: 1px solid {COLORS['border']}; margin-top: 20px;">
+        <h4 style="color: {COLORS['text_main']}; margin-top: 0;">🩺 Analisis Detail</h4>
+        <p style="color: {COLORS['text_body']}; font-size: 1rem; line-height: 1.6;">
+            {clean_diagnosis}
+        </p>
+    </div>
     """, unsafe_allow_html=True)
     
-    for i, rec in enumerate(analysis['recommendations'], 1):
-        icon = "✅" if analysis['is_healthy'] else "🔸"
-        st.markdown(f"""
-        <div style="display: flex; align-items: start; gap: 0.75rem; margin-bottom: 0.75rem; padding: 0.75rem; background: {COLORS['white']}; border-radius: 8px;">
-            <div style="flex-shrink: 0; width: 24px; height: 24px; background: {COLORS['info']}; color: {COLORS['white']}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
-                {i}
-            </div>
-            <div style="color: {COLORS['text_dark']}; flex: 1;">
-                {rec}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Section 5: Informasi Teknis (Collapsible)
-    with st.expander("🔧 Lihat Informasi Teknis Deteksi"):
-        col1, col2 = st.columns(2)
+    # --- REKOMENDASI (FIX: DITAMPILKAN SELALU) ---
+    # Bagian ini sekarang muncul untuk SEMUA kondisi (Sehat/Sakit)
+    if analysis.get('recommendations'):
+        header_text = "💡 Tips Perawatan:" if analysis['is_healthy'] else "🛡️ Rekomendasi Penanganan:"
+        header_color = COLORS['success'] if analysis['is_healthy'] else COLORS['text_main']
         
-        with col1:
-            st.markdown("**📊 Statistik Deteksi:**")
-            st.write(f"- Total prediksi: {summary.get('total_detections', 0)}")
-            st.write(f"- Filtered predictions: {summary.get('filtered_detections', 0)}")
-            st.write(f"- Healthy objects: {summary.get('healthy_count', 0)}")
-            st.write(f"- Unhealthy objects: {summary.get('unhealthy_count', 0)}")
-            st.write(f"- Average confidence: {summary.get('avg_confidence', 0):.1%}")
+        st.markdown(f"<h5 style='color: {header_color}; margin-top: 20px; margin-bottom: 10px;'>{header_text}</h5>", unsafe_allow_html=True)
         
-        with col2:
-            st.markdown("**⚙️ Pengaturan Analisis:**")
-            st.write(f"- Confidence threshold: {st.session_state.confidence_threshold:.0%}")
-            st.write(f"- Model: YOLOv8 Plant Disease")
-            st.write(f"- Plant type: {analysis.get('plant_type', 'Unknown')}")
-            st.write(f"- File analyzed: {filename}")
-        
-        # Raw data
-        st.markdown("**📄 Raw Detection Data:**")
-        st.json({
-            "filename": filename,
-            "plant_type": analysis.get('plant_type', 'Unknown'),
-            "health_score": analysis.get('health_score', 0),
-            "disease_risk": analysis.get('disease_risk', 'Unknown'),
-            "predictions_count": summary.get('filtered_detections', 0),
-            "model_used": analysis.get('model_used', 'Unknown')
-        })
+        for rec in analysis['recommendations']:
+            # Bersihkan juga ** di dalam rekomendasi jika ada
+            clean_rec = re.sub(r'\*\*(.*?)\*\*', r'**\1**', rec) # Biarkan markdown star untuk st.info
+            
+            if "Segera" in rec:
+                st.error(clean_rec, icon="🚨")
+            else:
+                st.info(clean_rec, icon="✨" if analysis['is_healthy'] else "🛡️")
+
+    # Tombol Simpan
+    st.write("")
+    col_save = st.columns(1)[0]
+    with col_save:
+        if st.button("💾 Simpan ke Riwayat", use_container_width=True, type="secondary"):
+            success, msg = save_scan_result(
+                image_pil=original_image,
+                filename=filename,
+                disease_name=display_name,
+                confidence=analysis['avg_confidence'],
+                risk_level=analysis['disease_risk']
+            )
+            if success:
+                st.success(f"✅ {msg}")
+                st.balloons()
+            else:
+                st.error(f"❌ {msg}")

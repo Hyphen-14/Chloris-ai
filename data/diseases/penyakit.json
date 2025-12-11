@@ -45,12 +45,30 @@
       "Gunakan pestisida organik"
     ]
   },
+  "cucumber veggie - healthy": {
+    "nama_id": "Buah Mentimun Sehat",
+    "tingkat_bahaya": "Low",
+    "solusi": [
+      "Panen pada waktu yang tepat",
+      "Simpan di suhu sejuk",
+      "Jaga kebersihan area tanam"
+    ]
+  },
+  "cucumber veggie - unhealthy": {
+    "nama_id": "Buah Mentimun Sakit/Cacat",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Cek kekurangan nutrisi (Kalsium/Boron)",
+      "Pastikan penyiraman konsisten",
+      "Buang buah yang membusuk"
+    ]
+  },
   "cucumber-mosaic": {
     "nama_id": "Mosaic Virus - Mentimun",
     "tingkat_bahaya": "High",
     "solusi": [
       "Buang tanaman terinfeksi",
-      "Kendalikan serangga vektor",
+      "Kendalikan serangga vektor (kutu daun)",
       "Gunakan varietas tahan virus",
       "Sterilkan alat kebun"
     ]
@@ -59,30 +77,48 @@
     "nama_id": "Powdery Mildew - Mentimun",
     "tingkat_bahaya": "Medium",
     "solusi": [
-      "Semprot baking soda solution",
+      "Semprot larutan baking soda",
       "Tingkatkan sirkulasi udara",
       "Gunakan fungisida sulfur",
-      "Hindari penyiraman daun"
+      "Hindari penyiraman daun sore hari"
     ]
   },
   "lettuce-bacterial leaf spot": {
     "nama_id": "Bercak Bakteri - Selada",
     "tingkat_bahaya": "Medium",
     "solusi": [
-      "Hindari penyiraman dari atas",
+      "Hindari penyiraman dari atas (sprinkler)",
       "Gunakan bakterisida tembaga",
       "Buang daun terinfeksi",
       "Tingkatkan jarak tanam"
+    ]
+  },
+  "lettuce-bottom rot": {
+    "nama_id": "Busuk Bawah (Bottom Rot) - Selada",
+    "tingkat_bahaya": "High",
+    "solusi": [
+      "Perbaiki drainase tanah",
+      "Gunakan fungisida sebelum tanam",
+      "Hindari daun menyentuh tanah basah"
+    ]
+  },
+  "lettuce-damping off": {
+    "nama_id": "Damping Off (Rebah Semai)",
+    "tingkat_bahaya": "High",
+    "solusi": [
+      "Gunakan media tanam steril",
+      "Jangan menyiram berlebihan saat pembibitan",
+      "Pastikan sirkulasi udara baik"
     ]
   },
   "lettuce-downy mildew": {
     "nama_id": "Downy Mildew - Selada",
     "tingkat_bahaya": "High",
     "solusi": [
-      "Kurangi kelembaban",
+      "Kurangi kelembaban udara",
       "Gunakan fungisida sistemik",
       "Rotasi tanaman",
-      "Buang tanaman terinfeksi"
+      "Buang sisa tanaman terinfeksi"
     ]
   },
   "lettuce-healthy": {
@@ -91,7 +127,52 @@
     "solusi": [
       "Pertahankan perawatan",
       "Jaga tanah tetap lembab",
-      "Berikan pupuk nitrogen"
+      "Berikan pupuk nitrogen cukup"
+    ]
+  },
+  "lettuce-mosaic-virus": {
+    "nama_id": "Mosaic Virus - Selada",
+    "tingkat_bahaya": "High",
+    "solusi": [
+      "Cabut dan bakar tanaman sakit",
+      "Kendalikan kutu daun",
+      "Gunakan benih bebas virus"
+    ]
+  },
+  "lettuce-powdery mildew": {
+    "nama_id": "Powdery Mildew - Selada",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Gunakan fungisida berbahan sulfur",
+      "Kurangi naungan/peneduh",
+      "Bersihkan gulma sekitar"
+    ]
+  },
+  "lettuce-septoria": {
+    "nama_id": "Septoria Leaf Spot - Selada",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Gunakan fungisida chlorothalonil",
+      "Rotasi tanaman 2 tahun",
+      "Gunakan irigasi tetes"
+    ]
+  },
+  "lettuce-unhealthy": {
+    "nama_id": "Selada Sakit (Umum)",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Identifikasi gejala spesifik",
+      "Cek nutrisi tanah",
+      "Isolasi dari tanaman sehat"
+    ]
+  },
+  "lettuce-wilt and leaf blight": {
+    "nama_id": "Layu & Hawar Daun - Selada",
+    "tingkat_bahaya": "High",
+    "solusi": [
+      "Perbaiki drainase segera",
+      "Cek adanya infeksi akar",
+      "Gunakan varietas tahan layu"
     ]
   },
   "strawberry fruit-healthy": {
@@ -103,6 +184,15 @@
       "Berikan pupuk kaya kalium"
     ]
   },
+  "strawberry fruit-unhealthy": {
+    "nama_id": "Buah Stroberi Sakit/Busuk",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Buang buah yang busuk segera",
+      "Gunakan alas jerami/plastik mulsa",
+      "Hindari buah menyentuh tanah"
+    ]
+  },
   "strawberry leaf-healthy": {
     "nama_id": "Daun Stroberi Sehat",
     "tingkat_bahaya": "Low",
@@ -112,24 +202,42 @@
       "Pantau pertumbuhan rutin"
     ]
   },
-  "strawberry-angular leafspot": {
+  "strawberry leaf-unhealthy": {
+    "nama_id": "Daun Stroberi Sakit",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Pangkas daun yang rusak",
+      "Cek adanya tungau/hama",
+      "Semprot fungisida organik jika perlu"
+    ]
+  },
+  "strawberry-angular-leafspot": {
     "nama_id": "Bercak Sudut - Stroberi",
     "tingkat_bahaya": "Medium",
     "solusi": [
       "Gunakan fungisida tembaga",
-      "Hindari penyiraman daun",
+      "Hindari penyiraman daun (overhead)",
       "Buang daun terinfeksi",
       "Tingkatkan sirkulasi udara"
     ]
   },
+  "strawberry-mildew": {
+    "nama_id": "Mildew (Embun Tepung) - Stroberi",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Semprot fungisida sulfur",
+      "Kurangi kepadatan tanaman",
+      "Pastikan sinar matahari cukup"
+    ]
+  },
   "tomato-early blight": {
-    "nama_id": "Hawar Dini - Tomat",
+    "nama_id": "Hawar Dini (Early Blight) - Tomat",
     "tingkat_bahaya": "High",
     "solusi": [
-      "Gunakan fungisida chlorothalonil",
-      "Buang daun bawah terinfeksi",
+      "Gunakan fungisida chlorothalonil/tembaga",
+      "Buang daun bawah yang menguning",
       "Rotasi tanaman 3-4 tahun",
-      "Hindari penyiraman dari atas"
+      "Hindari penyiraman daun"
     ]
   },
   "tomato-healthy": {
@@ -141,14 +249,32 @@
       "Jaga kelembaban konsisten"
     ]
   },
+  "tomato-septoria": {
+    "nama_id": "Septoria Leaf Spot - Tomat",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Buang daun bercak segera",
+      "Semprot fungisida mancozeb",
+      "Bersihkan gulma di sekitar tanaman",
+      "Jangan bekerja saat daun basah"
+    ]
+  },
+  "tomato-unhealthy": {
+    "nama_id": "Tomat Sakit (Umum)",
+    "tingkat_bahaya": "Medium",
+    "solusi": [
+      "Cek gejala pada daun/batang/buah",
+      "Pastikan drainase lancar",
+      "Konsultasi ahli jika menyebar cepat"
+    ]
+  },
   "unknown_disease": {
     "nama_id": "Penyakit Tidak Dikenal",
     "tingkat_bahaya": "Medium",
     "solusi": [
       "Konsultasikan dengan ahli tanaman",
       "Foto gejala dari berbagai angle",
-      "Isolasi tanaman sementara",
-      "Pantau perkembangan gejala"
+      "Isolasi tanaman sementara"
     ]
   }
 }
